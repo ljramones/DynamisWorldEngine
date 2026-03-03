@@ -1,0 +1,42 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.dynamisworldengine</groupId>
+    <artifactId>dynamis-worldengine-parent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>world-runtime</artifactId>
+  <name>DynamisWorldEngine Runtime</name>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.dynamisworldengine</groupId>
+      <artifactId>world-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.dynamisecs</groupId>
+      <artifactId>ecs-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.dynamissession</groupId>
+      <artifactId>session-runtime</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.dynamiscontent</groupId>
+      <artifactId>content-runtime</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.dynamisscenegraph</groupId>
+      <artifactId>scene-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

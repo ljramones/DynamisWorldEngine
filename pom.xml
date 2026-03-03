@@ -1,0 +1,134 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.dynamisworldengine</groupId>
+  <artifactId>dynamis-worldengine-parent</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <name>DynamisWorldEngine Parent</name>
+
+  <modules>
+    <module>world-api</module>
+    <module>world-runtime</module>
+    <module>world-samples</module>
+  </modules>
+
+  <properties>
+    <maven.compiler.release>25</maven.compiler.release>
+    <maven.compiler.parameters>true</maven.compiler.parameters>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <junit.version>5.11.4</junit.version>
+    <dynamis.core.version>1.0.0</dynamis.core.version>
+    <dynamisecs.version>1.0.0-SNAPSHOT</dynamisecs.version>
+    <dynamisscenegraph.version>1.0.0-SNAPSHOT</dynamisscenegraph.version>
+    <dynamissession.version>1.0.0-SNAPSHOT</dynamissession.version>
+    <dynamiscontent.version>1.0.0-SNAPSHOT</dynamiscontent.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.dynamis</groupId>
+        <artifactId>dynamis-core</artifactId>
+        <version>${dynamis.core.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.dynamisecs</groupId>
+        <artifactId>ecs-api</artifactId>
+        <version>${dynamisecs.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.dynamisecs</groupId>
+        <artifactId>ecs-core</artifactId>
+        <version>${dynamisecs.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.dynamisscenegraph</groupId>
+        <artifactId>scene-api</artifactId>
+        <version>${dynamisscenegraph.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.dynamisscenegraph</groupId>
+        <artifactId>scene-core</artifactId>
+        <version>${dynamisscenegraph.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.dynamissession</groupId>
+        <artifactId>session-api</artifactId>
+        <version>${dynamissession.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.dynamissession</groupId>
+        <artifactId>session-runtime</artifactId>
+        <version>${dynamissession.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.dynamiscontent</groupId>
+        <artifactId>content-api</artifactId>
+        <version>${dynamiscontent.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.dynamiscontent</groupId>
+        <artifactId>content-runtime</artifactId>
+        <version>${dynamiscontent.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter</artifactId>
+        <version>${junit.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.dynamisworldengine</groupId>
+        <artifactId>world-api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.dynamisworldengine</groupId>
+        <artifactId>world-runtime</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.dynamisworldengine</groupId>
+        <artifactId>world-samples</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.14.0</version>
+          <configuration>
+            <release>${maven.compiler.release}</release>
+            <parameters>${maven.compiler.parameters}</parameters>
+            <compilerArgs>
+              <arg>--enable-preview</arg>
+            </compilerArgs>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>3.5.2</version>
+          <configuration>
+            <argLine>--enable-preview</argLine>
+            <useModulePath>false</useModulePath>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>
