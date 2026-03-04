@@ -33,6 +33,21 @@
       <version>0.1.0-SNAPSHOT</version>
     </dependency>
     <dependency>
+      <groupId>org.dynamisinput</groupId>
+      <artifactId>input-api</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dynamisinput</groupId>
+      <artifactId>input-core</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dynamisinput</groupId>
+      <artifactId>input-runtime</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>
