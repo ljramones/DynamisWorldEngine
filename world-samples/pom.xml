@@ -67,5 +67,35 @@
       <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.dynamisassetpipeline</groupId>
+      <artifactId>pipeline-api</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.dynamisassetpipeline</groupId>
+      <artifactId>pipeline-core</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.dynamisassetpipeline</groupId>
+      <artifactId>pipeline-cli</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <argLine>--enable-preview --add-modules jdk.incubator.vector</argLine>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

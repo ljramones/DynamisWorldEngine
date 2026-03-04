@@ -2,8 +2,10 @@ package org.dynamisworldengine.samples.content;
 
 import org.dynamiscontent.api.id.AssetId;
 import org.dynamiscontent.api.id.AssetType;
+import org.dynamiscontent.api.id.AssetTypes;
 import org.dynamiscontent.api.loader.AssetLoader;
 import org.dynamiscontent.api.loader.AssetResolver;
+import org.dynamiscontent.api.manifest.DmeshBlob;
 import org.dynamiscontent.api.manifest.ManifestEntry;
 import org.dynamiscontent.core.manifest.AssetManifestBuilder;
 import org.dynamiscontent.runtime.ContentRuntime;
@@ -28,11 +30,9 @@ class ContentDrivenRenderablesSpikeTest {
     void assetIdRenderableRefsShouldResolveToSingleInstanceBatchAndSyncToEngine() throws Exception {
         ContentRuntime runtime = ContentRuntime.builder()
                 .manifest(new AssetManifestBuilder()
-                        .add(MESH_CUBE, RenderableResolver.MESH_HANDLE.id(), "1")
-                        .add(MAT_DEFAULT, RenderableResolver.MATERIAL_KEY.id(), "mat.default")
+                        .add(MESH_CUBE, AssetTypes.DMESH_BLOB.id(), "unused")
                         .build())
-                .loader(new MeshHandleLoader())
-                .loader(new MaterialKeyLoader())
+                .loader(new TestDmeshLoader())
                 .build();
 
         RenderableResolver resolver = new RenderableResolver(runtime);
@@ -52,7 +52,7 @@ class ContentDrivenRenderablesSpikeTest {
         for (var entity : world.entities()) {
             ResolvedRenderable resolved = world.get(entity, ResolvedKeys.RESOLVED_RENDERABLE).orElseThrow();
             assertEquals(1, resolved.meshHandle());
-            assertEquals("mat.default", resolved.materialKey());
+            assertEquals("mat/default", resolved.materialKey());
         }
 
         DefaultSceneGraph sceneGraph = new DefaultSceneGraph();
@@ -62,7 +62,7 @@ class ContentDrivenRenderablesSpikeTest {
         assertEquals(1, batched.batches().size());
         var batch = batched.batches().getFirst();
         assertEquals(entityCount, batch.instanceCount());
-        assertEquals(RenderKey.of(Integer.valueOf(1), "mat.default"), batch.key());
+        assertEquals(RenderKey.of(Integer.valueOf(1), "mat/default"), batch.key());
 
         FakeEngineRuntime engine = new FakeEngineRuntime();
         SceneGraphToLightEngineAdapter adapter = new SceneGraphToLightEngineAdapter();
@@ -82,27 +82,15 @@ class ContentDrivenRenderablesSpikeTest {
         assertEquals(16, engine.lastUpdatedCols());
     }
 
-    private static final class MeshHandleLoader implements AssetLoader<Integer> {
+    private static final class TestDmeshLoader implements AssetLoader<DmeshBlob> {
         @Override
-        public AssetType<Integer> type() {
-            return RenderableResolver.MESH_HANDLE;
+        public AssetType<DmeshBlob> type() {
+            return AssetTypes.DMESH_BLOB;
         }
 
         @Override
-        public Integer load(AssetId id, ManifestEntry entry, AssetResolver resolver) {
-            return Integer.valueOf(RenderableResolver.parseMeshHandleUri(entry.uri()));
-        }
-    }
-
-    private static final class MaterialKeyLoader implements AssetLoader<String> {
-        @Override
-        public AssetType<String> type() {
-            return RenderableResolver.MATERIAL_KEY;
-        }
-
-        @Override
-        public String load(AssetId id, ManifestEntry entry, AssetResolver resolver) {
-            return entry.uri();
+        public DmeshBlob load(AssetId id, ManifestEntry entry, AssetResolver resolver) {
+            return new DmeshBlob(1, new byte[]{1, 2, 3}, 0x0000000100000000L);
         }
     }
 }
