@@ -15,6 +15,7 @@ import org.dynamisscenegraph.core.DefaultSceneGraph;
 import org.dynamisworldengine.runtime.projection.ProjectionKeys;
 import org.dynamisworldengine.runtime.projection.components.BoundsSphereComponent;
 import org.dynamisworldengine.runtime.projection.components.TranslationComponent;
+import org.dynamisworldengine.samples.content.upload.FakeMeshUploadService;
 import org.dynamisworldengine.samples.render.FakeEngineRuntime;
 import org.dynamisworldengine.samples.render.SceneGraphToLightEngineAdapter;
 import org.junit.jupiter.api.Test;
@@ -35,7 +36,8 @@ class ContentDrivenRenderablesSpikeTest {
                 .loader(new TestDmeshLoader())
                 .build();
 
-        RenderableResolver resolver = new RenderableResolver(runtime);
+        FakeMeshUploadService uploader = new FakeMeshUploadService();
+        RenderableResolver resolver = new RenderableResolver(runtime, uploader);
         ResolveRenderablesSystem resolveSystem = new ResolveRenderablesSystem(resolver);
         ContentDrivenProjector projector = new ContentDrivenProjector();
 
@@ -54,6 +56,7 @@ class ContentDrivenRenderablesSpikeTest {
             assertEquals(1, resolved.meshHandle());
             assertEquals("mat/default", resolved.materialKey());
         }
+        assertEquals(1, uploader.uploadCount());
 
         DefaultSceneGraph sceneGraph = new DefaultSceneGraph();
         projector.project(world, sceneGraph);

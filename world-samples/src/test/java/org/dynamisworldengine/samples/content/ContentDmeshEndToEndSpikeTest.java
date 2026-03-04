@@ -11,6 +11,7 @@ import org.dynamisscenegraph.core.DefaultSceneGraph;
 import org.dynamisworldengine.runtime.projection.ProjectionKeys;
 import org.dynamisworldengine.runtime.projection.components.BoundsSphereComponent;
 import org.dynamisworldengine.runtime.projection.components.TranslationComponent;
+import org.dynamisworldengine.samples.content.upload.FakeMeshUploadService;
 import org.dynamisworldengine.samples.render.FakeEngineRuntime;
 import org.dynamisworldengine.samples.render.SceneGraphToLightEngineAdapter;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,7 @@ class ContentDmeshEndToEndSpikeTest {
         assertEquals(first.instanceCount(), second.instanceCount());
         assertEquals(first.registerCalls(), second.registerCalls());
         assertEquals(first.updateCalls(), second.updateCalls());
+        assertEquals(first.uploadCount(), second.uploadCount());
     }
 
     private static RunResult runFlow(Path tempDir, int entityCount) throws Exception {
@@ -76,7 +78,8 @@ class ContentDmeshEndToEndSpikeTest {
                 .registerDefaultLoaders()
                 .build();
 
-        RenderableResolver resolver = new RenderableResolver(runtime);
+        FakeMeshUploadService uploader = new FakeMeshUploadService();
+        RenderableResolver resolver = new RenderableResolver(runtime, uploader);
         ResolveRenderablesSystem resolveSystem = new ResolveRenderablesSystem(resolver);
         ContentDrivenProjector projector = new ContentDrivenProjector();
 
@@ -90,12 +93,13 @@ class ContentDmeshEndToEndSpikeTest {
 
         resolveSystem.run(world);
 
-        int expectedMeshHandle = RenderableResolver.deterministicMeshHandle(cookResult.contentHash64());
+        int expectedMeshHandle = FakeMeshUploadService.deterministicMeshHandle(cookResult.contentHash64());
         for (var entity : world.entities()) {
             ResolvedRenderable resolved = world.get(entity, ResolvedKeys.RESOLVED_RENDERABLE).orElseThrow();
             assertEquals(expectedMeshHandle, resolved.meshHandle());
             assertEquals(MAT_DEFAULT.value(), resolved.materialKey());
         }
+        assertEquals(1, uploader.uploadCount());
 
         DefaultSceneGraph sceneGraph = new DefaultSceneGraph();
         projector.project(world, sceneGraph);
@@ -124,9 +128,16 @@ class ContentDmeshEndToEndSpikeTest {
         assertEquals(16, engine.lastUpdatedCols());
 
         return new RunResult(expectedMeshHandle, batched.batches().size(), batch.instanceCount(),
-                engine.registerCalls(), engine.updateCalls());
+                engine.registerCalls(), engine.updateCalls(), uploader.uploadCount());
     }
 
-    private record RunResult(int meshHandle, int batchCount, int instanceCount, int registerCalls, int updateCalls) {
+    private record RunResult(
+            int meshHandle,
+            int batchCount,
+            int instanceCount,
+            int registerCalls,
+            int updateCalls,
+            int uploadCount
+    ) {
     }
 }
