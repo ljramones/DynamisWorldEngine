@@ -3,6 +3,8 @@ package org.dynamisworldengine.samples.render;
 import org.dynamislight.api.config.EngineConfig;
 import org.dynamislight.api.error.EngineException;
 import org.dynamislight.api.input.EngineInput;
+import org.dynamislight.api.mesh.MeshUploadRequest;
+import org.dynamislight.api.mesh.MeshUploadResult;
 import org.dynamislight.api.runtime.EngineApiVersion;
 import org.dynamislight.api.runtime.EngineCapabilities;
 import org.dynamislight.api.runtime.EngineFrameResult;
@@ -69,6 +71,15 @@ public final class FakeEngineRuntime implements EngineRuntime {
         lastRegisteredCols = matrices.length == 0 ? 0 : matrices[0].length;
 
         return nextHandle++;
+    }
+
+    @Override
+    public MeshUploadResult registerMesh(MeshUploadRequest request) {
+        return new MeshUploadResult(nextHandle++, false, request.meshId());
+    }
+
+    @Override
+    public void removeMesh(int meshHandle) {
     }
 
     @Override
