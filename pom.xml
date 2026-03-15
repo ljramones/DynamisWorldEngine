@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.dynamisworldengine</groupId>
+  <groupId>org.dynamisengine.worldengine</groupId>
   <artifactId>dynamis-worldengine-parent</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
@@ -31,51 +31,51 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.dynamis</groupId>
+        <groupId>org.dynamisengine</groupId>
         <artifactId>dynamis-core</artifactId>
         <version>${dynamis.core.version}</version>
       </dependency>
 
       <dependency>
-        <groupId>org.dynamisecs</groupId>
+        <groupId>org.dynamisengine.ecs</groupId>
         <artifactId>ecs-api</artifactId>
         <version>${dynamisecs.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.dynamisecs</groupId>
+        <groupId>org.dynamisengine.ecs</groupId>
         <artifactId>ecs-core</artifactId>
         <version>${dynamisecs.version}</version>
       </dependency>
 
       <dependency>
-        <groupId>org.dynamisscenegraph</groupId>
+        <groupId>org.dynamisengine.scenegraph</groupId>
         <artifactId>scene-api</artifactId>
         <version>${dynamisscenegraph.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.dynamisscenegraph</groupId>
+        <groupId>org.dynamisengine.scenegraph</groupId>
         <artifactId>scene-core</artifactId>
         <version>${dynamisscenegraph.version}</version>
       </dependency>
 
       <dependency>
-        <groupId>org.dynamissession</groupId>
+        <groupId>org.dynamisengine.session</groupId>
         <artifactId>session-api</artifactId>
         <version>${dynamissession.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.dynamissession</groupId>
+        <groupId>org.dynamisengine.session</groupId>
         <artifactId>session-runtime</artifactId>
         <version>${dynamissession.version}</version>
       </dependency>
 
       <dependency>
-        <groupId>org.dynamiscontent</groupId>
+        <groupId>org.dynamisengine.content</groupId>
         <artifactId>content-api</artifactId>
         <version>${dynamiscontent.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.dynamiscontent</groupId>
+        <groupId>org.dynamisengine.content</groupId>
         <artifactId>content-runtime</artifactId>
         <version>${dynamiscontent.version}</version>
       </dependency>
@@ -87,17 +87,17 @@
       </dependency>
 
       <dependency>
-        <groupId>org.dynamisworldengine</groupId>
+        <groupId>org.dynamisengine.worldengine</groupId>
         <artifactId>world-api</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.dynamisworldengine</groupId>
+        <groupId>org.dynamisengine.worldengine</groupId>
         <artifactId>world-runtime</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.dynamisworldengine</groupId>
+        <groupId>org.dynamisengine.worldengine</groupId>
         <artifactId>world-samples</artifactId>
         <version>${project.version}</version>
       </dependency>

@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.dynamisworldengine</groupId>
+    <groupId>org.dynamisengine.worldengine</groupId>
     <artifactId>dynamis-worldengine-parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
   </parent>
@@ -14,23 +14,23 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.dynamis</groupId>
+      <groupId>org.dynamisengine</groupId>
       <artifactId>dynamis-core</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.dynamisecs</groupId>
+      <groupId>org.dynamisengine.ecs</groupId>
       <artifactId>ecs-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.dynamiscontent</groupId>
+      <groupId>org.dynamisengine.content</groupId>
       <artifactId>content-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.dynamissession</groupId>
+      <groupId>org.dynamisengine.session</groupId>
       <artifactId>session-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.dynamisscenegraph</groupId>
+      <groupId>org.dynamisengine.scenegraph</groupId>
       <artifactId>scene-api</artifactId>
     </dependency>
     <dependency>
