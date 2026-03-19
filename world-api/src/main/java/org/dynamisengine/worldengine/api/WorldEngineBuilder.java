@@ -37,6 +37,7 @@ public final class WorldEngineBuilder {
     private int tickRate = 60;
     private boolean headless = false;
     private boolean testMode = false;
+    private final java.util.List<Object> subsystems = new java.util.ArrayList<>();
 
     WorldEngineBuilder() {}
 
@@ -90,6 +91,16 @@ public final class WorldEngineBuilder {
         return this;
     }
 
+    /**
+     * Register an engine subsystem (advanced use).
+     * The object must implement the runtime's WorldSubsystem interface.
+     * Subsystems are initialized in dependency order before app.initialize().
+     */
+    public WorldEngineBuilder subsystem(Object subsystem) {
+        subsystems.add(java.util.Objects.requireNonNull(subsystem, "subsystem"));
+        return this;
+    }
+
     /** Run in test mode: NullAudioBackend, deterministic, no real devices. */
     public WorldEngineBuilder testMode() {
         this.testMode = true;
@@ -124,6 +135,9 @@ public final class WorldEngineBuilder {
 
     /** @return true if test mode is enabled */
     public boolean isTestMode() { return testMode; }
+
+    /** @return registered subsystem objects (cast to WorldSubsystem in runtime) */
+    public java.util.List<Object> subsystems() { return java.util.List.copyOf(subsystems); }
 
     /**
      * Build and immediately run. Blocks until the engine stops.

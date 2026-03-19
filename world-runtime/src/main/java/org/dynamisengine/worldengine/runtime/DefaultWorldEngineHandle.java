@@ -8,6 +8,7 @@ import org.dynamisengine.worldengine.runtime.projection.DefaultWorldProjector;
 import org.dynamisengine.worldengine.runtime.session.DefaultWorldBootstrapper;
 import org.dynamisengine.worldengine.runtime.subsystem.SubsystemCoordinator;
 import org.dynamisengine.worldengine.runtime.subsystem.SubsystemRegistry;
+import org.dynamisengine.worldengine.runtime.subsystem.WorldSubsystem;
 
 import java.util.Objects;
 
@@ -68,9 +69,16 @@ final class DefaultWorldEngineHandle implements WorldEngineHandle {
                 ? builder.bootstrapper()
                 : new DefaultWorldBootstrapper();
 
-        // Subsystem registry — subsystems can be added via builder extension later.
-        // For now, the coordinator starts empty (core subsystems are managed directly).
+        // Register subsystems from builder
         SubsystemRegistry registry = new SubsystemRegistry();
+        for (Object sub : builder.subsystems()) {
+            if (sub instanceof WorldSubsystem ws) {
+                registry.register(ws);
+            } else {
+                LOG.log(System.Logger.Level.WARNING,
+                        "Ignoring non-WorldSubsystem object: {0}", sub.getClass().getName());
+            }
+        }
         this.coordinator = new SubsystemCoordinator(registry);
     }
 
