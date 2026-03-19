@@ -2,8 +2,10 @@ package org.dynamisengine.worldengine.api;
 
 import org.dynamisengine.ecs.api.world.World;
 import org.dynamisengine.scenegraph.api.SceneGraph;
+import org.dynamisengine.worldengine.api.telemetry.WorldTelemetrySnapshot;
 
 import java.util.Objects;
+import java.util.function.Supplier;
 
 /**
  * The facade-level context passed to {@link WorldApplication} lifecycle hooks.
@@ -30,7 +32,8 @@ public record GameContext(
         long tick,
         double elapsedSeconds,
         WorldEngineState engineState,
-        Runnable stopRequester) {
+        Runnable stopRequester,
+        Supplier<WorldTelemetrySnapshot> telemetrySupplier) {
 
     public GameContext {
         Objects.requireNonNull(world, "world context must not be null");
@@ -40,6 +43,14 @@ public record GameContext(
     /** Request the engine to stop after the current tick. */
     public void requestStop() {
         if (stopRequester != null) stopRequester.run();
+    }
+
+    /**
+     * Capture a structured telemetry snapshot of the entire engine.
+     * Returns null if telemetry is not available (e.g., during init).
+     */
+    public WorldTelemetrySnapshot telemetry() {
+        return telemetrySupplier != null ? telemetrySupplier.get() : null;
     }
 
     /** Convenience: direct access to the ECS world. */

@@ -8,6 +8,7 @@ module org.dynamisengine.worldengine.api {
     exports org.dynamisengine.worldengine.api;
     exports org.dynamisengine.worldengine.api.config;
     exports org.dynamisengine.worldengine.api.lifecycle;
+    exports org.dynamisengine.worldengine.api.telemetry;
 
     uses org.dynamisengine.worldengine.api.WorldEngine.WorldEngineHandleFactory;
 }

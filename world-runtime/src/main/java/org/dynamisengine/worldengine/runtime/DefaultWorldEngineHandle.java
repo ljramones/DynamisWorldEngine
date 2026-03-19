@@ -3,9 +3,12 @@ package org.dynamisengine.worldengine.runtime;
 import org.dynamisengine.worldengine.api.*;
 import org.dynamisengine.worldengine.api.config.WorldConfig;
 import org.dynamisengine.worldengine.api.lifecycle.*;
+import org.dynamisengine.worldengine.api.telemetry.*;
 import org.dynamisengine.worldengine.runtime.projection.DefaultWorldProjector;
 import org.dynamisengine.worldengine.runtime.session.DefaultWorldBootstrapper;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -33,6 +36,15 @@ final class DefaultWorldEngineHandle implements WorldEngineHandle {
     private volatile WorldEngineState state = WorldEngineState.CREATED;
     private volatile GameContext gameContext;
     private volatile boolean stopRequested = false;
+
+    // -- Telemetry tracking ---------------------------------------------------
+    private volatile long currentTick = 0;
+    private volatile double lastTickDurationMs = 0;
+    private volatile double maxTickDurationMs = 0;
+    private volatile double tickDurationTotalMs = 0;
+    private volatile long tickCount = 0;
+    private volatile long startTimeNanos = 0;
+    private volatile String lastError = null;
 
     DefaultWorldEngineHandle(WorldEngineBuilder builder) {
         this.application = Objects.requireNonNull(builder.application());
@@ -69,8 +81,10 @@ final class DefaultWorldEngineHandle implements WorldEngineHandle {
             // Bootstrap the world (creates WorldContext with ECS, session, content, scene)
             WorldContext worldContext = bootstrapper.newGame(config);
 
-            // Create enriched GameContext
-            this.gameContext = new GameContext(worldContext, 0, 0.0, state, this::stop);
+            // Create enriched GameContext with telemetry supplier
+            this.startTimeNanos = System.nanoTime();
+            this.gameContext = new GameContext(worldContext, 0, 0.0, state, this::stop,
+                    this::captureTelemetry);
 
             // Call application initialize
             LOG.log(System.Logger.Level.INFO, "Calling application.initialize()");
@@ -153,14 +167,17 @@ final class DefaultWorldEngineHandle implements WorldEngineHandle {
             previousTickNanos = tickStart;
             double elapsedSeconds = (tickStart - startTimeNanos) / 1_000_000_000.0;
 
-            // Update GameContext with current timing
-            this.gameContext = new GameContext(worldContext, tick, elapsedSeconds, state, this::stop);
+            // Update GameContext with current timing and telemetry
+            this.currentTick = tick;
+            this.gameContext = new GameContext(worldContext, tick, elapsedSeconds, state,
+                    this::stop, this::captureTelemetry);
 
             // Run world tick (ECS simulation + projection)
             try {
                 tickRunner.runTick(worldContext, tick);
             } catch (DynamisTickException e) {
                 if (e.isRecoverable()) {
+                    lastError = e.subsystemName() + ": " + e.getMessage();
                     LOG.log(System.Logger.Level.WARNING,
                             "Recoverable tick error ({0}, tick {1}): {2}",
                             e.subsystemName(), e.tickNumber(), e.getMessage());
@@ -190,8 +207,16 @@ final class DefaultWorldEngineHandle implements WorldEngineHandle {
 
             tick++;
 
+            // Track tick duration for telemetry
+            long tickEndNanos = System.nanoTime();
+            double tickMs = (tickEndNanos - tickStart) / 1_000_000.0;
+            lastTickDurationMs = tickMs;
+            tickDurationTotalMs += tickMs;
+            tickCount++;
+            if (tickMs > maxTickDurationMs) maxTickDurationMs = tickMs;
+
             // Pace to target tick rate
-            long elapsed = System.nanoTime() - tickStart;
+            long elapsed = tickEndNanos - tickStart;
             long sleepNanos = tickDurationNanos - elapsed;
             if (sleepNanos > 1_000_000) { // only sleep if > 1ms remaining
                 try {
@@ -202,6 +227,35 @@ final class DefaultWorldEngineHandle implements WorldEngineHandle {
                 }
             }
         }
+    }
+
+    // -- Telemetry capture ----------------------------------------------------
+
+    /**
+     * Capture a structured telemetry snapshot of the entire engine.
+     * Called lazily when game code invokes context.telemetry().
+     * No blocking, minimal allocation (one record per call).
+     */
+    private WorldTelemetrySnapshot captureTelemetry() {
+        double uptimeSeconds = startTimeNanos > 0
+                ? (System.nanoTime() - startTimeNanos) / 1_000_000_000.0 : 0;
+        double avgMs = tickCount > 0 ? tickDurationTotalMs / tickCount : 0;
+        double targetMs = 1000.0 / tickRate;
+
+        EngineTelemetry engine = new EngineTelemetry(
+                state, currentTick, uptimeSeconds,
+                lastTickDurationMs, avgMs, maxTickDurationMs,
+                targetMs, tickRate);
+
+        // Subsystem health — placeholder for now.
+        // Phase T2 will integrate Audio/Input telemetry here.
+        List<SubsystemHealth> subsystems = new ArrayList<>();
+        subsystems.add(SubsystemHealth.healthy("ECS", currentTick));
+        subsystems.add(SubsystemHealth.healthy("Session", currentTick));
+        subsystems.add(SubsystemHealth.healthy("Content", currentTick));
+        subsystems.add(SubsystemHealth.healthy("SceneGraph", currentTick));
+
+        return new WorldTelemetrySnapshot(engine, subsystems, lastError);
     }
 
     // -- Shutdown -------------------------------------------------------------
