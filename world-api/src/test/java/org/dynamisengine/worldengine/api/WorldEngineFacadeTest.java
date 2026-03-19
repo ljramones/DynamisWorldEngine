@@ -83,9 +83,9 @@ class WorldEngineFacadeTest {
     @Test
     void gameContextRejectsNull() {
         assertThrows(NullPointerException.class,
-                () -> new GameContext(null, 0, 0.0, WorldEngineState.RUNNING));
+                () -> new GameContext(null, 0, 0.0, WorldEngineState.RUNNING, null));
         assertThrows(NullPointerException.class,
-                () -> new GameContext(stubWorldContext(), 0, 0.0, null));
+                () -> new GameContext(stubWorldContext(), 0, 0.0, null, null));
     }
 
     // -- WorldApplication default methods ------------------------------------

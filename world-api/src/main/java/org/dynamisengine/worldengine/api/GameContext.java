@@ -29,11 +29,17 @@ public record GameContext(
         WorldContext world,
         long tick,
         double elapsedSeconds,
-        WorldEngineState engineState) {
+        WorldEngineState engineState,
+        Runnable stopRequester) {
 
     public GameContext {
         Objects.requireNonNull(world, "world context must not be null");
         Objects.requireNonNull(engineState, "engineState must not be null");
+    }
+
+    /** Request the engine to stop after the current tick. */
+    public void requestStop() {
+        if (stopRequester != null) stopRequester.run();
     }
 
     /** Convenience: direct access to the ECS world. */

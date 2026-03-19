@@ -70,7 +70,7 @@ final class DefaultWorldEngineHandle implements WorldEngineHandle {
             WorldContext worldContext = bootstrapper.newGame(config);
 
             // Create enriched GameContext
-            this.gameContext = new GameContext(worldContext, 0, 0.0, state);
+            this.gameContext = new GameContext(worldContext, 0, 0.0, state, this::stop);
 
             // Call application initialize
             LOG.log(System.Logger.Level.INFO, "Calling application.initialize()");
@@ -154,7 +154,7 @@ final class DefaultWorldEngineHandle implements WorldEngineHandle {
             double elapsedSeconds = (tickStart - startTimeNanos) / 1_000_000_000.0;
 
             // Update GameContext with current timing
-            this.gameContext = new GameContext(worldContext, tick, elapsedSeconds, state);
+            this.gameContext = new GameContext(worldContext, tick, elapsedSeconds, state, this::stop);
 
             // Run world tick (ECS simulation + projection)
             try {
