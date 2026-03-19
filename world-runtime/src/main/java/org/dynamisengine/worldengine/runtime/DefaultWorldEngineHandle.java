@@ -7,8 +7,6 @@ import org.dynamisengine.worldengine.api.telemetry.*;
 import org.dynamisengine.worldengine.runtime.projection.DefaultWorldProjector;
 import org.dynamisengine.worldengine.runtime.session.DefaultWorldBootstrapper;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -247,13 +245,29 @@ final class DefaultWorldEngineHandle implements WorldEngineHandle {
                 lastTickDurationMs, avgMs, maxTickDurationMs,
                 targetMs, tickRate);
 
-        // Subsystem health — placeholder for now.
-        // Phase T2 will integrate Audio/Input telemetry here.
-        List<SubsystemHealth> subsystems = new ArrayList<>();
-        subsystems.add(SubsystemHealth.healthy("ECS", currentTick));
-        subsystems.add(SubsystemHealth.healthy("Session", currentTick));
-        subsystems.add(SubsystemHealth.healthy("Content", currentTick));
-        subsystems.add(SubsystemHealth.healthy("SceneGraph", currentTick));
+        // Subsystem telemetry slots.
+        // Core subsystems report health. Audio/Input/SpatialInput slots are
+        // present but empty (ABSENT) until Phase 3 wires them.
+        var subsystems = new java.util.LinkedHashMap<String, SubsystemTelemetry>();
+
+        // Core subsystems (always present when engine is running)
+        subsystems.put(WorldTelemetrySnapshot.ECS,
+                SubsystemTelemetry.healthOnly(SubsystemHealth.healthy("ECS", currentTick)));
+        subsystems.put(WorldTelemetrySnapshot.SESSION,
+                SubsystemTelemetry.healthOnly(SubsystemHealth.healthy("Session", currentTick)));
+        subsystems.put(WorldTelemetrySnapshot.CONTENT,
+                SubsystemTelemetry.healthOnly(SubsystemHealth.healthy("Content", currentTick)));
+        subsystems.put(WorldTelemetrySnapshot.SCENE_GRAPH,
+                SubsystemTelemetry.healthOnly(SubsystemHealth.healthy("SceneGraph", currentTick)));
+
+        // Optional subsystem slots — ABSENT until Phase 3 wires them.
+        // When wired, these will carry typed detail (AudioTelemetry, InputTelemetry, etc.)
+        subsystems.put(WorldTelemetrySnapshot.AUDIO,
+                SubsystemTelemetry.healthOnly(SubsystemHealth.absent("Audio")));
+        subsystems.put(WorldTelemetrySnapshot.INPUT,
+                SubsystemTelemetry.healthOnly(SubsystemHealth.absent("Input")));
+        subsystems.put(WorldTelemetrySnapshot.SPATIAL_INPUT,
+                SubsystemTelemetry.healthOnly(SubsystemHealth.absent("SpatialInput")));
 
         return new WorldTelemetrySnapshot(engine, subsystems, lastError);
     }
