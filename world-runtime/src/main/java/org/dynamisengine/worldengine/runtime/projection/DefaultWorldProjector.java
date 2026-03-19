@@ -9,8 +9,8 @@ import org.dynamisengine.worldengine.api.lifecycle.WorldProjector;
 import org.dynamisengine.worldengine.runtime.projection.components.BoundsSphereComponent;
 import org.dynamisengine.worldengine.runtime.projection.components.RenderableComponent;
 import org.dynamisengine.worldengine.runtime.projection.components.TranslationComponent;
-import org.vectrix.affine.Transformf;
-import org.vectrix.core.Vector3f;
+import org.dynamisengine.vectrix.affine.Transformf;
+import org.dynamisengine.vectrix.core.Vector3f;
 
 import java.util.Map;
 import java.util.Optional;

@@ -3,7 +3,7 @@ module org.dynamisengine.worldengine.samples {
     requires org.dynamisengine.core;
     requires org.dynamisengine.window.api;
     requires org.dynamisengine.window.test;
-    requires org.vectrix;
+    requires org.dynamisengine.vectrix;
     requires engine.api;
     requires content.api;
     requires content.core;

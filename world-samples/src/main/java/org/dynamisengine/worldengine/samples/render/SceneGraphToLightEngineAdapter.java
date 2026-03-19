@@ -5,7 +5,7 @@ import org.dynamisengine.light.api.runtime.EngineRuntime;
 import org.dynamisengine.scenegraph.api.extract.BatchedRenderScene;
 import org.dynamisengine.scenegraph.api.extract.InstanceBatch;
 import org.dynamisengine.scenegraph.api.extract.RenderKey;
-import org.vectrix.core.Matrix4f;
+import org.dynamisengine.vectrix.core.Matrix4f;
 
 import java.util.HashMap;
 import java.util.HashSet;

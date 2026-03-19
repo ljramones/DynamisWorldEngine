@@ -5,8 +5,8 @@ import org.dynamisengine.scenegraph.api.SceneNodeId;
 import org.dynamisengine.scenegraph.core.DefaultSceneGraph;
 import org.dynamisengine.ecs.api.world.World;
 import org.dynamisengine.worldengine.runtime.projection.ProjectionKeys;
-import org.vectrix.affine.Transformf;
-import org.vectrix.core.Vector3f;
+import org.dynamisengine.vectrix.affine.Transformf;
+import org.dynamisengine.vectrix.core.Vector3f;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
