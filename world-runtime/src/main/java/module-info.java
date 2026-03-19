@@ -13,6 +13,7 @@ module org.dynamisengine.worldengine.runtime {
     exports org.dynamisengine.worldengine.runtime.projection;
     exports org.dynamisengine.worldengine.runtime.projection.components;
     exports org.dynamisengine.worldengine.runtime.session;
+    exports org.dynamisengine.worldengine.runtime.subsystem;
 
     provides org.dynamisengine.worldengine.api.WorldEngine.WorldEngineHandleFactory
         with org.dynamisengine.worldengine.runtime.DefaultWorldEngineHandleFactory;

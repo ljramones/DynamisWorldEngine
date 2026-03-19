@@ -6,6 +6,8 @@ import org.dynamisengine.worldengine.api.lifecycle.*;
 import org.dynamisengine.worldengine.api.telemetry.*;
 import org.dynamisengine.worldengine.runtime.projection.DefaultWorldProjector;
 import org.dynamisengine.worldengine.runtime.session.DefaultWorldBootstrapper;
+import org.dynamisengine.worldengine.runtime.subsystem.SubsystemCoordinator;
+import org.dynamisengine.worldengine.runtime.subsystem.SubsystemRegistry;
 
 import java.util.Objects;
 
@@ -44,6 +46,9 @@ final class DefaultWorldEngineHandle implements WorldEngineHandle {
     private volatile long startTimeNanos = 0;
     private volatile String lastError = null;
 
+    // -- Subsystem orchestration ----------------------------------------------
+    private final SubsystemCoordinator coordinator;
+
     DefaultWorldEngineHandle(WorldEngineBuilder builder) {
         this.application = Objects.requireNonNull(builder.application());
         this.config = builder.configOrDefault();
@@ -62,6 +67,11 @@ final class DefaultWorldEngineHandle implements WorldEngineHandle {
         this.bootstrapper = builder.bootstrapper() != null
                 ? builder.bootstrapper()
                 : new DefaultWorldBootstrapper();
+
+        // Subsystem registry — subsystems can be added via builder extension later.
+        // For now, the coordinator starts empty (core subsystems are managed directly).
+        SubsystemRegistry registry = new SubsystemRegistry();
+        this.coordinator = new SubsystemCoordinator(registry);
     }
 
     @Override
@@ -78,6 +88,10 @@ final class DefaultWorldEngineHandle implements WorldEngineHandle {
 
             // Bootstrap the world (creates WorldContext with ECS, session, content, scene)
             WorldContext worldContext = bootstrapper.newGame(config);
+
+            // Initialize and start registered subsystems in dependency order
+            coordinator.initializeAll(worldContext);
+            coordinator.startAll();
 
             // Create enriched GameContext with telemetry supplier
             this.startTimeNanos = System.nanoTime();
@@ -170,6 +184,17 @@ final class DefaultWorldEngineHandle implements WorldEngineHandle {
             this.gameContext = new GameContext(worldContext, tick, elapsedSeconds, state,
                     this::stop, this::captureTelemetry);
 
+            // Tick registered subsystems in dependency order
+            try {
+                coordinator.tickAll(tick, deltaSeconds);
+            } catch (DynamisTickException e) {
+                lastError = e.subsystemName() + ": " + e.getMessage();
+                LOG.log(System.Logger.Level.ERROR,
+                        "Non-recoverable subsystem tick error: " + e.getMessage());
+                state = WorldEngineState.FAULTED;
+                break;
+            }
+
             // Run world tick (ECS simulation + projection)
             try {
                 tickRunner.runTick(worldContext, tick);
@@ -245,29 +270,19 @@ final class DefaultWorldEngineHandle implements WorldEngineHandle {
                 lastTickDurationMs, avgMs, maxTickDurationMs,
                 targetMs, tickRate);
 
-        // Subsystem telemetry slots.
-        // Core subsystems report health. Audio/Input/SpatialInput slots are
-        // present but empty (ABSENT) until Phase 3 wires them.
-        var subsystems = new java.util.LinkedHashMap<String, SubsystemTelemetry>();
+        // Aggregate telemetry from coordinator (registered subsystems)
+        var subsystems = new java.util.LinkedHashMap<>(coordinator.telemetrySnapshot());
 
-        // Core subsystems (always present when engine is running)
-        subsystems.put(WorldTelemetrySnapshot.ECS,
+        // Core subsystems managed directly (not via coordinator yet)
+        // These get basic health reporting until they become proper WorldSubsystem adapters
+        subsystems.putIfAbsent(WorldTelemetrySnapshot.ECS,
                 SubsystemTelemetry.healthOnly(SubsystemHealth.healthy("ECS", currentTick)));
-        subsystems.put(WorldTelemetrySnapshot.SESSION,
+        subsystems.putIfAbsent(WorldTelemetrySnapshot.SESSION,
                 SubsystemTelemetry.healthOnly(SubsystemHealth.healthy("Session", currentTick)));
-        subsystems.put(WorldTelemetrySnapshot.CONTENT,
+        subsystems.putIfAbsent(WorldTelemetrySnapshot.CONTENT,
                 SubsystemTelemetry.healthOnly(SubsystemHealth.healthy("Content", currentTick)));
-        subsystems.put(WorldTelemetrySnapshot.SCENE_GRAPH,
+        subsystems.putIfAbsent(WorldTelemetrySnapshot.SCENE_GRAPH,
                 SubsystemTelemetry.healthOnly(SubsystemHealth.healthy("SceneGraph", currentTick)));
-
-        // Optional subsystem slots — ABSENT until Phase 3 wires them.
-        // When wired, these will carry typed detail (AudioTelemetry, InputTelemetry, etc.)
-        subsystems.put(WorldTelemetrySnapshot.AUDIO,
-                SubsystemTelemetry.healthOnly(SubsystemHealth.absent("Audio")));
-        subsystems.put(WorldTelemetrySnapshot.INPUT,
-                SubsystemTelemetry.healthOnly(SubsystemHealth.absent("Input")));
-        subsystems.put(WorldTelemetrySnapshot.SPATIAL_INPUT,
-                SubsystemTelemetry.healthOnly(SubsystemHealth.absent("SpatialInput")));
 
         return new WorldTelemetrySnapshot(engine, subsystems, lastError);
     }
@@ -291,6 +306,10 @@ final class DefaultWorldEngineHandle implements WorldEngineHandle {
                         "Application shutdown threw: " + t.getMessage(), t);
             }
         }
+
+        // Stop and shutdown registered subsystems in reverse dependency order
+        coordinator.stopAll();
+        coordinator.shutdownAll();
 
         state = WorldEngineState.STOPPED;
         LOG.log(System.Logger.Level.INFO, "WorldEngine stopped.");
