@@ -101,7 +101,8 @@ public final class FakeEngineRuntime implements EngineRuntime {
 
     @Override
     public EngineStats getStats() {
-        return new EngineStats(0.0, 0.0, 0.0, 0L, 0L, 0L, 0L, 0.0, 0.0, 0L);
+        return new EngineStats(0.0, 0.0, 0.0, 0L, 0L, 0L, 0L, 0.0, 0.0, 0L,
+                0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L);
     }
 
     @Override
