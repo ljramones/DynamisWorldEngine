@@ -7,6 +7,7 @@ import org.dynamisengine.worldengine.api.lifecycle.DynamisTickException;
 import org.dynamisengine.worldengine.api.telemetry.SubsystemHealth;
 import org.dynamisengine.worldengine.api.telemetry.SubsystemTelemetry;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,12 +64,24 @@ public final class SubsystemCoordinator {
         }
     }
 
+    // Per-system timing — reused across frames to avoid allocation
+    private final Map<String, Double> lastSystemTimings = new LinkedHashMap<>();
+    private double lastFrameTotalMs;
+    private String lastDominantSystem = "";
+    private double lastDominantTimeMs;
+
     /**
-     * Tick all subsystems in dependency order.
+     * Tick all subsystems in dependency order with per-system timing capture.
      * Recoverable exceptions are logged; non-recoverable propagate.
      */
     public void tickAll(long tick, float deltaSeconds) throws DynamisTickException {
+        lastSystemTimings.clear();
+        double frameTotal = 0;
+        double maxTime = 0;
+        String dominant = "";
+
         for (WorldSubsystem sub : initOrder) {
+            long sysStart = System.nanoTime();
             try {
                 sub.tick(tick, deltaSeconds);
             } catch (DynamisTickException e) {
@@ -76,11 +89,43 @@ public final class SubsystemCoordinator {
                     LOG.log(System.Logger.Level.WARNING,
                             "Recoverable tick error in {0}: {1}", sub.name(), e.getMessage());
                 } else {
-                    throw e; // propagate non-recoverable
+                    throw e;
+                }
+            } finally {
+                double sysMs = (System.nanoTime() - sysStart) / 1_000_000.0;
+                lastSystemTimings.put(sub.name(), sysMs);
+                frameTotal += sysMs;
+                if (sysMs > maxTime) {
+                    maxTime = sysMs;
+                    dominant = sub.name();
                 }
             }
         }
+
+        lastFrameTotalMs = frameTotal;
+        lastDominantSystem = dominant;
+        lastDominantTimeMs = maxTime;
     }
+
+    /**
+     * Per-system timing from the most recent tick.
+     * Keys are system names, values are execution time in ms.
+     */
+    public Map<String, Double> lastSystemTimings() {
+        return Collections.unmodifiableMap(lastSystemTimings);
+    }
+
+    /** Total ECS frame time in ms from the most recent tick. */
+    public double lastFrameTotalMs() { return lastFrameTotalMs; }
+
+    /** Name of the dominant (slowest) system from the most recent tick. */
+    public String lastDominantSystem() { return lastDominantSystem; }
+
+    /** Execution time of the dominant system in ms. */
+    public double lastDominantTimeMs() { return lastDominantTimeMs; }
+
+    /** Number of systems that executed in the most recent tick. */
+    public int systemCount() { return initOrder.size(); }
 
     /**
      * Stop all subsystems in reverse dependency order.

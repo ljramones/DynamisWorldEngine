@@ -282,9 +282,11 @@ final class DefaultWorldEngineHandle implements WorldEngineHandle {
         var subsystems = new java.util.LinkedHashMap<>(coordinator.telemetrySnapshot());
 
         // Core subsystems managed directly (not via coordinator yet)
-        // These get basic health reporting until they become proper WorldSubsystem adapters
+        // ECS includes per-system timing data as detail
         subsystems.putIfAbsent(WorldTelemetrySnapshot.ECS,
-                SubsystemTelemetry.healthOnly(SubsystemHealth.healthy("ECS", currentTick)));
+                SubsystemTelemetry.of(
+                    SubsystemHealth.healthy("ECS", currentTick),
+                    coordinator.lastSystemTimings()));
         subsystems.putIfAbsent(WorldTelemetrySnapshot.SESSION,
                 SubsystemTelemetry.healthOnly(SubsystemHealth.healthy("Session", currentTick)));
         subsystems.putIfAbsent(WorldTelemetrySnapshot.CONTENT,
